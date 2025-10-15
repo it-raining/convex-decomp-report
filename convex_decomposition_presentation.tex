@@ -1,0 +1,730 @@
+% filepath: c:\Users\Admin\Desktop\latex_temp\capstone_project\convex_decomposition_presentation.tex
+\documentclass[aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{vietnam}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{multicol}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% Tùy chỉnh màu sắc cho các box
+\setbeamercolor{block title}{bg=blue!70,fg=white}
+\setbeamercolor{block body}{bg=blue!10,fg=black}
+\setbeamercolor{block title alerted}{bg=red!70,fg=white}
+\setbeamercolor{block body alerted}{bg=red!10,fg=black}
+\setbeamercolor{block title example}{bg=teal!60,fg=white}
+\setbeamercolor{block body example}{bg=teal!8,fg=black}
+
+\title{Các Kỹ thuật Phân hoạch Lồi cho Hoạch định Chuyển động Robot}
+\author{Nhóm 2 thằng Khoa}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Mục tiêu Buổi trình bày}
+    \begin{block}{Các câu hỏi cần làm rõ}
+        \begin{itemize}
+            \item Chuyển bài toán phân chia (decomposition) thành tối ưu phân hoạch (partition)
+                  các vùng lồi như thế nào?
+            \item Độ đo xấp xỉ của một vùng lồi được đo lường ra sao?
+            \item Thuật toán IRIS được sử dụng cụ thể ở đâu, trong trường hợp nào? Có những thuật
+                  toán nào khác được dùng cho từng trường hợp không?
+            \item Các phương pháp được áp dụng trong môi trường 2D như thế nào?
+        \end{itemize}
+    \end{block}
+    \begin{alertblock}{Mục tiêu chính}
+        Buổi trình bày hôm nay sẽ tập trung giải đáp các câu hỏi trên, cung cấp cái nhìn tổng quan về các kỹ thuật phân hoạch lồi và ứng dụng của chúng.
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Nội dung}
+    \tableofcontents
+\end{frame}
+
+\section{Các Nguyên tắc Nền tảng}
+
+\begin{frame}{Định nghĩa Phân hoạch Lồi}
+
+    \begin{block}{Định nghĩa}
+        \textbf{Phân hoạch lồi (Convex Decomposition)} là quá trình chia một hình học phức tạp (không lồi) thành một tập hợp các \textbf{vùng con lồi} sao cho hợp của chúng khôi phục lại hình ban đầu và các vùng con không chồng lấn nhau (ngoại trừ biên chung).
+    \end{block}
+
+    \begin{block}{Công thức}
+        Với một miền hình học $P\subset\mathbb{R}^n$, một \textit{phân hoạch lồi} của $P$ là tập hợp $\{P_1, P_2, \dots, P_k\}$ sao cho:
+        \[
+            P = \bigcup_{i=1}^{k} P_i, \quad
+            P_i \cap P_j = \partial P_i \cap \partial P_j \ \text{với mọi } i \ne j,
+        \]
+        và mỗi $P_i$ là một tập lồi.
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Mục tiêu và Điều kiện Tồn tại}
+
+    \begin{alertblock}{Mục tiêu}
+        \begin{itemize}
+            \item Tối thiểu hóa số lượng vùng lồi
+            \item Giảm thiểu chồng chéo
+            \item Tránh vùng quá ``mảnh'' hoặc ``dài''
+        \end{itemize}
+    \end{alertblock}
+
+    \begin{exampleblock}{Kết quả lý thuyết}
+        Bất kỳ đa giác đơn nào đều có thể được phân hoạch thành tập hợp các vùng lồi.
+
+        \textbf{Lý do:} Mọi đa giác đơn có thể tam giác hóa, mỗi tam giác là tập lồi.
+
+        \textbf{Hạn chế:} Tạo ra số lượng lớn các thành phần, không thực tế cho ứng dụng.
+    \end{exampleblock}
+
+\end{frame}
+
+\begin{frame}{Phân loại Phương pháp}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \begin{block}{Exact Convex Decomposition (ECD)}
+            \begin{itemize}
+                \item Thành phần hoàn toàn lồi
+                \item Tái tạo chính xác
+                \item NP-hard
+                \item Số lượng vùng lớn
+                \item Chủ yếu lý thuyết
+            \end{itemize}
+        \end{block}
+
+        \column{0.48\textwidth}
+        \begin{alertblock}{Approximate Convex Decomposition (ACD)}
+            \begin{itemize}
+                \item Gần lồi với dung sai $\tau$
+                \item Hiệu quả tính toán cao
+                \item Giảm số lượng vùng
+                \item Kiểm soát mức chi tiết
+                \item Ứng dụng thực tế
+            \end{itemize}
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\section{Phân hoạch Lồi Xấp xỉ (ACD)}
+
+\begin{frame}{Các Khái niệm Cơ bản}
+
+    \begin{block}{Định nghĩa các thành phần}
+        \begin{itemize}
+            \item \textbf{Vỏ Lồi ($H_P$):} Tập lồi nhỏ nhất chứa $P$
+                  \[
+                      P \text{ lồi} \Leftrightarrow P = H_P
+                  \]
+
+            \item \textbf{Khía (Notches):} Đỉnh không trên $H_P$, góc trong $> 180^\circ$
+
+            \item \textbf{Cầu (Bridges):} Cạnh của $\partial H_P$ nối hai đỉnh không liền kề
+                  \[
+                      \text{BRIDGES}(P) = \partial H_P \setminus \partial P
+                  \]
+
+            \item \textbf{Túi (Pockets):} Chuỗi cạnh không thuộc $\partial H_P$
+                  \[
+                      \text{POCKETS}(P) = \partial P \setminus \partial H_P
+                  \]
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Minh họa Các Khái niệm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{imgs/ACD-5.png}
+        \caption{\small Vỏ lồi, khía, cầu và túi trong đa giác không lồi}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Thuật toán ACD - Ý tưởng}
+
+    \begin{exampleblock}{Chiến lược chia để trị đệ quy}
+        \begin{enumerate}
+            \item \textbf{Đo độ lõm:} Xác định đỉnh lõm có độ lõm lớn nhất
+            \item \textbf{Kiểm tra dung sai:} Nếu độ lõm $< \tau$, kết thúc
+            \item \textbf{Giải quyết đỉnh lõm:} Thêm đường cắt, chia đa giác
+            \item \textbf{Đệ quy:} Áp dụng cho các thành phần mới
+        \end{enumerate}
+    \end{exampleblock}
+
+    \begin{block}{Độ phức tạp}
+        $O(n r^2)$, với $n$ là số đỉnh, $r$ là số đỉnh lõm
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Quá trình Phân rã Đệ quy}
+    \centering
+    \includegraphics[width=0.7\textwidth]{imgs/ACD-3.png}
+
+    \begin{block}{Quy trình}
+        % \small
+        \textbf{(a)} Gộp biên vào đa giác
+
+        \textbf{(b)} Tách đa giác thành hai
+
+        \textbf{(c)} Độ lõm thay đổi sau phân rã
+
+        \vspace{0.2cm}
+        Quá trình tiếp tục đến khi $\leq \tau$
+    \end{block}
+\end{frame}
+
+\begin{frame}{Minh họa thuật toán}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\linewidth]{imgs/ACD-1.png}
+        \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.8\linewidth]{imgs/ACD-2.png}
+
+    \begin{block}{SL-Concavity}
+        Khoảng cách Euclid đến cầu nối (bridge).
+        \begin{itemize}
+            \item[\textcolor{teal}{+}] Nhanh
+            \item[\textcolor{red}{--}] Không đảm bảo tính đơn điệu
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.7\textwidth]{imgs/sp_concavity.png}
+
+    \begin{block}{SP-Concavity}
+        Đường đi ngắn nhất trong túi (pocket) đến cầu nối tương ứng.
+        \begin{itemize}
+            \item[\textcolor{red}{--}] Chậm hơn
+            \item[\textcolor{teal}{+}] Đảm bảo tính đơn điệu
+            \item[\textcolor{teal}{+}] Xử lý tất cả đặc điểm lõm quan trọng
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.7\linewidth]{imgs/ACD-6.png}
+    \begin{alertblock}{H-Concavity}
+        Lai ghép SL và SP - Mặc định dùng SL, chuyển sang SP khi phát hiện không đơn điệu (kiểm tra: $n_\beta \cdot n_i < 0$).
+    \end{alertblock}
+
+\end{frame}
+
+\section{IRIS Algorithm}
+
+\begin{frame}{IRIS - Ý tưởng Chính}
+
+    \begin{block}{Iterative Regional Inflation by Semidefinite Programming}
+        \textbf{Câu hỏi cốt lõi:} Với điểm mầm (seed), vùng lồi lớn nhất là gì?
+    \end{block}
+
+    \begin{exampleblock}{Quy trình lặp 4 bước}
+        \begin{enumerate}
+            \item Khởi tạo hình cầu \underline{rất nhỏ} tại seed
+            \item Tìm siêu phẳng phân cách (QP)
+            \item Tìm ellipsoid nội tiếp cực đại (SDP)
+            \item Lặp lại đến hội tụ
+        \end{enumerate}
+    \end{exampleblock}
+
+    \begin{alertblock}{Output}
+        Một vùng lồi lớn nhất từ seed point
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}{IRIS Bước 2: Tìm Siêu phẳng}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{imgs/iris_algo_1.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Biến đổi không gian}
+            \small
+            Từ ellipsoid sang quả cầu đơn vị:
+            \[
+                \tilde{x} = C^{-1}(x - d)
+            \]
+        \end{block}
+
+        \begin{block}{QP Problem}
+            \small
+            \[
+                \begin{aligned}
+                    \min_{\tilde{x}, w} \quad & \|\tilde{x}\|^2                \\
+                    \text{s.t.} \quad         & [\tilde{v}_{j,i}]w = \tilde{x} \\
+                                              & w_i \geq 0
+                \end{aligned}
+            \]
+
+            \textbf{Pháp tuyến:}
+            \[
+                a_j = 2C^{-1}C^{-\top}(x^* - d)
+            \]
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{IRIS Bước 3: Ellipsoid Nội tiếp}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{imgs/iris_2.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Ellipsoid Definition}
+            \small
+            \[
+                \mathcal{E} = \{C\tilde{x} + d : \|\tilde{x}\|_2 \leq 1\}
+            \]
+        \end{block}
+
+        \begin{block}{SDP Problem}
+            \small
+            \[
+                \begin{aligned}
+                    \max_{C,d} \quad  & \log \det C                            \\
+                    \text{s.t.} \quad & \|a_i^\top C\|_2 + a_i^\top d \leq b_i \\
+                                      & C \succ 0
+                \end{aligned}
+            \]
+
+            Tối đa hóa thể tích ellipsoid trong đa diện
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{IRIS - Đặc tính}
+
+    \begin{block}{Thuộc tính chính}
+        \begin{itemize}
+            \item \textbf{Loại:} Phương pháp xấp xỉ
+            \item \textbf{Hội tụ:} 4-8 vòng lặp
+            \item \textbf{Độ phức tạp:} Tuyến tính theo số obstacles
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Xử lý obstacles không lồi}
+        \begin{itemize}
+            \item \textbf{Work space:} Bao lồi hoặc phân hoạch trước
+            \item \textbf{Configuration space:} IRIS-NP, C-IRIS
+        \end{itemize}
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}{IRIS - Đặc tính}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{imgs/time-iris.png}
+        \caption{\small Thời gian thực thi IRIS tăng tuyến tính với số lượng obstacles.}
+    \end{figure}
+\end{frame}
+
+\section{Visibility Clique Cover (VCC)}
+
+\begin{frame}{VCC - Giải quyết Vấn đề Seeding}
+
+    \begin{alertblock}{Hạn chế của IRIS}
+        Cần điểm mầm tốt - việc lấy mầm ngẫu nhiên không hiệu quả
+    \end{alertblock}
+
+    \begin{exampleblock}{Giải pháp VCC}
+        Tự động hóa quy trình seeding thông qua cấu trúc toàn cục của không gian tự do
+    \end{exampleblock}
+
+\end{frame}
+
+\begin{frame}{VCC - Giải quyết Vấn đề Seeding}
+    \begin{block}{Quy trình 4 bước}
+        \begin{enumerate}
+            \item Lấy mẫu $n$ điểm trong $C_{free}$
+            \item Xây dựng đồ thị khả kiến (visibility graph)
+            \item Tìm lớp phủ clique (MAXCLIQUE + ILP)
+            \item Khởi tạo ellipsoid và lấp đầy (IRIS-like)
+        \end{enumerate}
+    \end{block}
+
+    \begin{block}{Ý tưởng cốt lõi}
+        Điểm ``nhìn thấy'' nhau $\Rightarrow$ có khả năng cùng vùng lồi
+    \end{block}
+\end{frame}
+
+
+\begin{frame}{VCC - Bước 1: Lấy mẫu \& Xây dựng Đồ thị Khả kiến}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/VCC-1.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Visibility Graph Construction}
+            \small
+            \begin{itemize}
+                \item Lấy mẫu $n$ điểm ngẫu nhiên trong $C_{free}$
+                \item Tạo cạnh giữa hai điểm nếu đoạn thẳng nối chúng không va chạm
+                \item Xây dựng đồ thị khả kiến (visibility graph)
+            \end{itemize}
+        \end{block}
+
+        \begin{exampleblock}{Định nghĩa}
+            \small
+            \textbf{Visibility graph:} Đồ thị có cạnh nối hai đỉnh khi đoạn thẳng nối chúng nằm hoàn toàn trong không gian tự do
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{VCC - Bước 2: Tìm Lớp phủ Clique}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/VCC-2.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Clique Cover Problem}
+            \small
+            \begin{itemize}
+                \item Tìm tập hợp các clique lớn (đồ thị con đầy đủ)
+                \item Sử dụng MAXCLIQUE algorithm
+                \item Giải bài toán Integer Linear Programming (ILP)
+            \end{itemize}
+        \end{block}
+
+        \begin{exampleblock}{Ý tưởng cốt lõi}
+            \small
+            Các điểm "nhìn thấy" nhau có khả năng nằm trong cùng một vùng lồi
+            
+            \vspace{0.2cm}
+            \textit{Con đường thẳng = an toàn}
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{VCC - Bước 3: Khởi tạo Ellipsoid}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/VCC-3.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Ellipsoid Initialization}
+            \small
+            \begin{itemize}
+                \item Tính ellipsoid có thể tích nhỏ nhất bao quanh tất cả điểm trong clique
+                \item Cung cấp tâm (seed point) cho bước tiếp theo
+                \item Xác định hình dạng ban đầu (các trục chính)
+            \end{itemize}
+        \end{block}
+
+        \begin{alertblock}{Lợi ích}
+            \small
+            Ellipsoid đã được "thông báo" về hình học cục bộ
+            
+            \vspace{0.2cm}
+            $\Rightarrow$ Hiệu quả hơn IRIS tiêu chuẩn
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{VCC - Bước 4: Lấp đầy thành Đa diện}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/VCC-4.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Inflation Process}
+            \small
+            \begin{itemize}
+                \item Sử dụng thuật toán tương tự IRIS
+                \item Một vòng lặp duy nhất (thay vì nhiều vòng)
+                \item Tạo đa diện lồi cuối cùng từ ellipsoid
+            \end{itemize}
+        \end{block}
+
+        \begin{alertblock}{Hiệu quả cao hơn IRIS}
+            \small
+            Ellipsoid ban đầu đã được ``thông báo'' về hình học cục bộ
+            
+            \vspace{0.2cm}
+            $\Rightarrow$ Loại bỏ nhiều vòng lặp tốn kém
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{VCC - Bước 5: Lặp lại và Hội tụ}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imgs/VCC-5.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Iteration Process}
+            \small
+            \begin{itemize}
+                \item Lấy mẫu mới từ không gian trống còn lại
+                \item Lặp lại các bước 1-4 cho vùng chưa phủ
+                \item Tiếp tục đến khi đạt độ phủ $\alpha$ đủ
+            \end{itemize}
+        \end{block}
+
+        \begin{exampleblock}{Điều kiện dừng}
+            \small
+            Quá trình kết thúc khi:
+            \begin{itemize}
+                \item Đạt độ phủ mong muốn $\alpha$
+                \item Không còn không gian đáng kể để phủ
+                \item Số vùng lồi đã đủ cho ứng dụng
+            \end{itemize}
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{VCC - Đặc tính và Ưu điểm}
+
+    \begin{block}{Đặc tính}
+        \begin{itemize}
+            \item \textbf{Loại:} Phương pháp xấp xỉ
+            \item \textbf{Mục tiêu:} Tối thiểu hóa số vùng với độ phủ $\alpha$
+            \item \textbf{Phương pháp:} Lai ghép hình học và ILP
+        \end{itemize}
+    \end{block}
+
+    \begin{exampleblock}{Ưu điểm}
+        \begin{itemize}
+            \item Tự động hóa hoàn toàn
+            \item Không phụ thuộc hình dạng obstacles
+            \item Sử dụng kiểm tra va chạm chung
+        \end{itemize}
+    \end{exampleblock}
+
+    % \begin{center}
+    %     \includegraphics[width=0.35\textwidth]{imgs/VCC-5.png}
+    % \end{center}
+
+\end{frame}
+
+\section{Ứng dụng trong GCS}
+
+\begin{frame}{Vai trò trong Graph of Convex Sets}
+
+    \begin{block}{Khuôn khổ GCS}
+        Yêu cầu phân hoạch lồi trước khi hoạch định chuyển động
+    \end{block}
+
+    \begin{block}{Vai trò phân hoạch}
+        \begin{itemize}
+            \item Các vùng lồi = đỉnh trong đồ thị $G$
+            \item Chất lượng phân hoạch $\Rightarrow$ hiệu suất GCS
+            \item Phân hoạch kém $\Rightarrow$ đồ thị phức tạp
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Chuỗi phụ thuộc}
+        Thuật toán phân hoạch tiên tiến $\Rightarrow$ GCS khả thi $\Rightarrow$ Giải quyết bài toán DOF cao
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}{Phương pháp theo Môi trường \& Độ phức tạp}
+
+    \begin{exampleblock}{2D đơn giản - Exact Decomposition}
+        \begin{itemize}
+            \item \textbf{Đa giác:} 12 vùng V-polytope $\rightarrow$ H-polytope
+            \item \textbf{Mê cung:} Grid decomposition $50 \times 50$
+            % \item Phân hoạch chính xác hoàn toàn khả thi
+        \end{itemize}
+    \end{exampleblock}
+
+    \begin{exampleblock}{3D Quadrotor - Box Decomposition}
+        \begin{itemize}
+            \item Axis-aligned box decomposition
+            % \item Hộp chữ nhật xung quanh vật cản
+            \item Thu nhỏ theo kích thước robot ($0.2m$ radius)
+        \end{itemize}
+    \end{exampleblock}
+
+    \begin{alertblock}{High-DOF (7-DOF, 14-DOF) - IRIS Approximate}
+        \begin{itemize}
+            \item \texttt{IrisInConfigurationSpace} từ Drake
+            \item Seed poses thủ công qua Inverse Kinematics
+            \item Kết hợp qua tích Descartes (dual arms)
+        \end{itemize}
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}{Ví dụ 2D - Phân hoạch Chính xác}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{imgs/2d-decompose.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Two-Dimensional Example}
+            \small
+            \textbf{12 vùng lồi V-polytope}
+
+            \vspace{0.3cm}
+            Chuyển đổi sang H-polytope:
+            \[
+                \mathcal{R}_i = \{x \in \mathbb{R}^2 : A_i x \leq b_i\}
+            \]
+
+            \vspace{0.3cm}
+            Sử dụng \texttt{ConvexHull} algorithm
+
+            \vspace{0.3cm}
+            \textbf{Kết quả:} Phù hợp hoàn hảo với GCS framework
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Ví dụ Maze - Grid Decomposition}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{imgs/maze-decompose.png}
+
+        \column{0.5\textwidth}
+        \begin{block}{Maze Planning}
+            \small
+            \textbf{Lưới đều $50 \times 50$}
+
+            \vspace{0.3cm}
+            Mỗi ô = vùng lồi $Q_i$
+
+            \vspace{0.3cm}
+            \textbf{Graph connectivity:}
+            \begin{itemize}
+                \item Dựa trên cấu trúc tường
+                \item Hai ô kề không tường $\Rightarrow$ có cạnh
+                \item Đơn giản nhưng hiệu quả
+            \end{itemize}
+        \end{block}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Ví dụ 3D Quadrotor - Chi tiết Box Decomposition}
+
+    \begin{block}{Thuật toán chia nhỏ không gian}
+        \begin{itemize}
+            \item \textbf{Phòng (Indoor):} Hộp duy nhất cho mỗi ô
+                  \[
+                      \text{size} = 2.5 - (\text{wall\_offset} + \text{quad\_radius})
+                  \]
+
+            \item \textbf{Ngoài trời (Outdoor):}
+                  \begin{itemize}
+                      \item \textit{Không cây:} Hộp lớn bao phủ toàn bộ
+                      \item \textit{Có cây:} 4 hộp xung quanh (trên, dưới, trái, phải)
+                  \end{itemize}
+
+            \item \textbf{Khe hở tường:}
+                  \begin{itemize}
+                      \item \textit{Cửa:} Hộp hẹp cao
+                      \item \textit{Cửa sổ:} 1-2 hộp nhỏ  
+                      \item \textit{Không tường:} Hộp lớn nối phòng
+                  \end{itemize}
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{High-DOF: KUKA 7-DOF \& Dual Arms 14-DOF}
+
+    % \begin{alertblock}{Thách thức}
+    %     \begin{itemize}
+    %         \item Không gian cấu hình 7D/14D
+    %         \item Vùng tự do phi lồi phức tạp
+    %         \item Không thể phân hoạch chính xác
+    %     \end{itemize}
+    % \end{alertblock}
+
+    \begin{block}{Giải pháp IRIS-based}
+        \begin{itemize}
+            \item Sử dụng \texttt{IrisInConfigurationSpace} (Drake)
+            \item Xử lý chướng ngại vật không lồi trong C-space
+            \item Sinh đa diện lồi $Q_i$ quanh seed poses
+            \item Song song hóa cho nhiều seed khác nhau
+        \end{itemize}
+    \end{block}
+
+    \begin{exampleblock}{Dual Arms: Kết hợp không gian}
+        Tích Descartes hoặc hợp lồi của các vùng từ từng cánh tay riêng lẻ
+    \end{exampleblock}
+
+\end{frame}
+
+\begin{frame}{Hạn chế và Cơ hội Cải tiến}
+
+    \begin{alertblock}{Vấn đề Seeding thủ công}
+        \begin{itemize}
+            \item IRIS cần seed poses được chọn thủ công
+            \item Sử dụng Inverse Kinematics để tạo seed
+            \item Không tự động, phụ thuộc kinh nghiệm người dùng
+        \end{itemize}
+    \end{alertblock}
+
+    % \begin{exampleblock}{Cơ hội với VCC}
+    %     \begin{itemize}
+    %         \item VCC tự động hóa hoàn toàn việc seeding
+    %         \item Không cần can thiệp thủ công
+    %         \item Phù hợp cho các hệ thống tự động
+    %     \end{itemize}
+    % \end{exampleblock}
+
+    \begin{block}{Ý nghĩa thực tiễn}
+        \textbf{Sự thành công của IRIS trong C-space nhiều chiều làm cho GCS khả thi cho robot thế giới thực}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Kết luận}
+
+    \begin{block}{Tầm quan trọng}
+        \textbf{Phân hoạch lồi} là nền tảng cho hoạch định robot hiện đại
+    \end{block}
+
+    \begin{exampleblock}{Các phương pháp chính}
+        \begin{itemize}
+            \item \textbf{ACD} cân bằng giữa chính xác và hiệu quả
+            \item \textbf{IRIS} cho phép xử lý không gian DOF cao
+            \item \textbf{VCC} tự động hóa seeding cho IRIS
+        \end{itemize}
+    \end{exampleblock}
+
+    \begin{alertblock}{Ứng dụng theo môi trường}
+        \begin{itemize}
+            \item 2D: Exact decomposition
+            \item 3D: Box/Grid decomposition
+            \item High-DOF: IRIS-based approximation
+        \end{itemize}
+    \end{alertblock}
+
+    \begin{block}{Kết nối với GCS}
+        \textbf{GCS framework} phụ thuộc hoàn toàn vào chất lượng phân hoạch
+    \end{block}
+
+\end{frame}
+
+\end{document}

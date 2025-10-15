@@ -1,0 +1,254 @@
+# LaTeX auxiliary files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# Intermediate LaTeX files
+*.dvi
+*.xdv
+*-converted-to.*
+
+# Bibliography auxiliary files
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Build tool auxiliary files
+*.fdb_latexmk
+*.fls
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# Algorithm package files
+*.alg
+*.loa
+
+# Asymptote & Metapost
+*.asy
+*.fls
+*.figlist
+*.makefile
+*.fdb_latexmk
+
+# Beamer presentation files
+*.nav
+*.pre
+*.snm
+*.vrb
+
+# Changes package
+*.soc
+
+# Comment package
+*.cut
+
+# Cprotect package
+*.cpt
+
+# Enumitem package
+*.eni
+
+# Fixme package
+*.lox
+
+# Glossaries package
+*.acn
+*.acr
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.lzo
+*.lzs
+
+# Hyperref package
+*.brf
+
+# Knitr package
+*-concordance.tex
+
+# Listings package
+*.lol
+
+# Makeidx package
+*.idx
+*.ilg
+*.ind
+
+# Minitoc package
+*.maf
+*.mlf
+*.mlt
+*.mtc[0-9]*
+*.slf[0-9]*
+*.slt[0-9]*
+*.stc[0-9]*
+
+# Minted package
+_minted*
+*.pyg
+
+# Morewrites package
+*.mw
+
+# Nomenclature package
+*.nlg
+*.nlo
+*.nls
+
+# Pax package
+*.pax
+
+# PdfSync package
+*.pdfsync
+
+# Sagetex package
+*.sagetex.sage
+*.sagetex.py
+*.sagetex.scmd
+
+# SyncTeX
+*.synctex
+*.synctex.gz
+*.synctex.gz(busy)
+*.synctex(busy)
+
+# TikZ & PGF
+*.auxlock
+*.figlist
+*.makefile
+*.tikz
+*.fdb_latexmk
+
+# Todonotes package
+*.tdo
+
+# Xindy package
+*.xdy
+
+# xmpincl package
+*.xmpi
+
+# xindy package
+*.xdy
+
+# WinEdt store files
+*.bak
+*.sav
+
+# Operating System Files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Editor-specific files
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Atom
+.atom/
+
+# Backup files
+*.backup
+*.old
+*-old
+*-backup
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.#*
+
+# Archive files (usually not needed in repo)
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# Custom build directories
+build/
+dist/
+out/
