@@ -160,11 +160,11 @@
     \end{figure}
 \end{frame}
 
-\begin{frame}{Quá trình Phân rã Đệ quy}
+\begin{frame}{Vi du ve giai quyet do lom}
     \centering
     \includegraphics[width=0.7\textwidth]{../imgs/ACD-3.png}
 
-    \begin{block}{Quy trình}
+    \begin{block}{Case}
         % \small
         \textbf{(a)} Gộp biên vào đa giác
 
@@ -276,9 +276,15 @@
 \begin{frame}{IRIS Bước 2: Tìm Siêu phẳng}
     \begin{columns}[c]
         \column{0.45\textwidth}
+        \begin{block}{Ellipsoid Definition}
+            \small
+            \[
+                \mathcal{E} = \{C\tilde{x} + d : \|\tilde{x}\|_2 \leq 1\}
+            \]
+        \end{block}
         \includegraphics[width=\textwidth]{../imgs/iris_algo_1.png}
-
         \column{0.5\textwidth}
+        
         \begin{block}{Biến đổi không gian}
             \small
             Từ ellipsoid sang quả cầu đơn vị:
@@ -299,7 +305,10 @@
 
             \textbf{Pháp tuyến:}
             \[
-                a_j = 2C^{-1}C^{-\top}(x^* - d)
+                \begin{aligned}
+                    a_j = 2C^{-1}C^{-\top}(x^* - d) \\
+                    b_j = a_j^{\top}x^*.
+                \end{aligned}
             \]
         \end{block}
     \end{columns}
@@ -311,12 +320,7 @@
         \includegraphics[width=\textwidth]{../imgs/iris_2.png}
 
         \column{0.5\textwidth}
-        \begin{block}{Ellipsoid Definition}
-            \small
-            \[
-                \mathcal{E} = \{C\tilde{x} + d : \|\tilde{x}\|_2 \leq 1\}
-            \]
-        \end{block}
+        
 
         \begin{block}{SDP Problem}
             \small
@@ -324,7 +328,7 @@
                 \begin{aligned}
                     \max_{C,d} \quad  & \log \det C                            \\
                     \text{s.t.} \quad & \|a_i^\top C\|_2 + a_i^\top d \leq b_i \\
-                                      & C \succ 0
+                                      & C \succeq 0
                 \end{aligned}
             \]
 
@@ -387,6 +391,9 @@
     \begin{block}{Ý tưởng cốt lõi}
         Điểm ``nhìn thấy'' nhau $\Rightarrow$ có khả năng cùng vùng lồi
     \end{block}
+
+    \includegraphics[width=\textwidth]{../imgs/VCC.png}
+
 \end{frame}
 
 
@@ -588,7 +595,7 @@
     \begin{alertblock}{High-DOF (7-DOF, 14-DOF) - IRIS Approximate}
         \begin{itemize}
             \item \texttt{IrisInConfigurationSpace} từ Drake
-            \item Seed poses thủ công qua Inverse Kinematics
+            \item seed points thủ công qua Inverse Kinematics
             \item Kết hợp qua tích Descartes (dual arms)
         \end{itemize}
     \end{alertblock}
@@ -682,9 +689,9 @@
 
     \begin{block}{Giải pháp IRIS-based}
         \begin{itemize}
-            \item Sử dụng \texttt{IrisInConfigurationSpace} (Drake)
+            \item Sử dụng \texttt{IrisInConfigurationSpace} (C-IRIS)
             \item Xử lý chướng ngại vật không lồi trong C-space
-            \item Sinh đa diện lồi $Q_i$ quanh seed poses
+            \item Sinh đa diện lồi $Q_i$ quanh seed points
             \item Song song hóa cho nhiều seed khác nhau
         \end{itemize}
     \end{block}
@@ -695,29 +702,29 @@
 
 \end{frame}
 
-\begin{frame}{Hạn chế và Cơ hội Cải tiến}
+% \begin{frame}{Hạn chế và Cơ hội Cải tiến}
 
-    \begin{alertblock}{Vấn đề Seeding thủ công}
-        \begin{itemize}
-            \item IRIS cần seed poses được chọn thủ công
-            \item Sử dụng Inverse Kinematics để tạo seed
-            \item Không tự động, phụ thuộc kinh nghiệm người dùng
-        \end{itemize}
-    \end{alertblock}
+%     \begin{alertblock}{Vấn đề Seeding thủ công}
+%         \begin{itemize}
+%             \item IRIS cần seed points được chọn thủ công
+%             \item Sử dụng Inverse Kinematics để tạo seed
+%             \item Không tự động, phụ thuộc kinh nghiệm người dùng
+%         \end{itemize}
+%     \end{alertblock}
 
-    % \begin{exampleblock}{Cơ hội với VCC}
-    %     \begin{itemize}
-    %         \item VCC tự động hóa hoàn toàn việc seeding
-    %         \item Không cần can thiệp thủ công
-    %         \item Phù hợp cho các hệ thống tự động
-    %     \end{itemize}
-    % \end{exampleblock}
+%     % \begin{exampleblock}{Cơ hội với VCC}
+%     %     \begin{itemize}
+%     %         \item VCC tự động hóa hoàn toàn việc seeding
+%     %         \item Không cần can thiệp thủ công
+%     %         \item Phù hợp cho các hệ thống tự động
+%     %     \end{itemize}
+%     % \end{exampleblock}
 
-    \begin{block}{Ý nghĩa thực tiễn}
-        \textbf{Sự thành công của IRIS trong C-space nhiều chiều làm cho GCS khả thi cho robot thế giới thực}
-    \end{block}
+%     \begin{block}{Ý nghĩa thực tiễn}
+%         \textbf{Sự thành công của IRIS trong C-space nhiều chiều làm cho GCS khả thi cho robot thế giới thực}
+%     \end{block}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}{Kết luận}
 
@@ -725,13 +732,13 @@
         \textbf{Phân hoạch lồi} là nền tảng cho hoạch định robot hiện đại
     \end{block}
 
-    \begin{exampleblock}{Các phương pháp chính}
-        \begin{itemize}
-            \item \textbf{ACD} cân bằng giữa chính xác và hiệu quả
-            \item \textbf{IRIS} cho phép xử lý không gian DOF cao
-            \item \textbf{VCC} tự động hóa seeding cho IRIS
-        \end{itemize}
-    \end{exampleblock}
+    % \begin{exampleblock}{Các phương pháp chính}
+    %     \begin{itemize}
+    %         \item \textbf{ACD} cân bằng giữa chính xác và hiệu quả
+    %         \item \textbf{IRIS} cho phép xử lý không gian DOF cao
+    %         \item \textbf{VCC} tự động hóa seeding cho IRIS
+    %     \end{itemize}
+    % \end{exampleblock}
 
     \begin{alertblock}{Ứng dụng theo môi trường}
         \begin{itemize}
