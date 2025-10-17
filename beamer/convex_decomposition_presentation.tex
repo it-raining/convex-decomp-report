@@ -16,7 +16,7 @@
 
 % Tùy chỉnh màu sắc cho các box
 \setbeamercolor{block title}{bg=blue!70,fg=white}
-\setbeamercolor{block body}{bg=blue!10,fg=black}
+\setbeamercolor{block body}{bg=red!10,fg=black}
 \setbeamercolor{block title alerted}{bg=red!70,fg=white}
 \setbeamercolor{block body alerted}{bg=red!10,fg=black}
 \setbeamercolor{block title example}{bg=teal!60,fg=white}
@@ -33,10 +33,9 @@
 \begin{frame}{Mục tiêu Buổi trình bày}
     \begin{block}{Các câu hỏi cần làm rõ}
         \begin{itemize}
-            \item Chuyển bài toán phân chia (decomposition) thành tối ưu phân hoạch (partition)
-                  các vùng lồi như thế nào?
+            \item Phân hoạch lồi là gì? Tại sao nó quan trọng trong hoạch định chuyển động?
             \item Độ đo xấp xỉ của một vùng lồi được đo lường ra sao?
-            \item Thuật toán IRIS được sử dụng cụ thể ở đâu, trong trường hợp nào? Có những thuật
+            \item Trong bài báo, Thuật toán IRIS được sử dụng cụ thể ở đâu, trong trường hợp nào? Có những thuật
                   toán nào khác được dùng cho từng trường hợp không?
             \item Các phương pháp được áp dụng trong môi trường 2D như thế nào?
         \end{itemize}
@@ -65,6 +64,7 @@
             P_i \cap P_j = \partial P_i \cap \partial P_j \ \text{với mọi } i \ne j,
         \]
         và mỗi $P_i$ là một tập lồi.
+        $\partial P_i$ là biên của vùng $P_i$.
     \end{block}
 
 \end{frame}
@@ -89,6 +89,23 @@
 
 \end{frame}
 
+\begin{frame}{Ví dụ về Phân hoạch Lồi Trong 2D}
+
+    \begin{figure}
+        \centering
+        \begin{tabular}{cc}
+            \includegraphics[width=0.2\textwidth]{../imgs/decompose-env3-1.png} &
+            \includegraphics[width=0.2\textwidth]{../imgs/decompose-env3-2.png} \\
+            \small (a) Case 1 & \small (b) Case 2 \\[1em]
+            \includegraphics[width=0.2\textwidth]{../imgs/bezier-env3-1.png} &
+            \includegraphics[width=0.2\textwidth]{../imgs/bezier-env3-2.png} \\
+            \small (c) Vỏ lồi và khía & \small (d) Kết quả cuối cùng
+        \end{tabular}
+        \caption{\small Các bước phân hoạch lồi cho đa giác 2D}
+    \end{figure}
+        
+\end{frame}
+
 \begin{frame}{Phân loại Phương pháp}
     \begin{columns}[T]
         \column{0.48\textwidth}
@@ -98,7 +115,7 @@
                 \item Tái tạo chính xác
                 \item NP-hard
                 \item Số lượng vùng lớn
-                \item Chủ yếu lý thuyết
+                \item Chủ yếu co trong lý thuyết
             \end{itemize}
         \end{block}
 
@@ -115,7 +132,52 @@
     \end{columns}
 \end{frame}
 
+
 \section{Phân hoạch Lồi Xấp xỉ (ACD)}
+
+\begin{frame}{Thuật toán ACD - Ý tưởng}
+
+    \begin{exampleblock}{Chiến lược chia để trị đệ quy}
+        \begin{enumerate}
+            \item \textbf{Đo độ lõm:} Xác định đỉnh lõm có độ lõm lớn nhất
+            \item \textbf{Kiểm tra dung sai:} Nếu độ lõm $< \tau$, kết thúc
+            \item \textbf{Giải quyết đỉnh lõm:} Thêm đường cắt, chia đa giác
+            \item \textbf{Đệ quy:} Áp dụng cho các thành phần mới
+        \end{enumerate}
+    \end{exampleblock}
+
+    \begin{block}{Độ phức tạp}
+        $O(n r^2)$, với $n$ là số đỉnh, $r$ là số đỉnh lõm
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Minh họa thuật toán}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\linewidth]{../imgs/ACD-1.png}
+        \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Quá trình Phân rã Đệ quy}
+    \centering
+    \includegraphics[width=0.7\textwidth]{../imgs/ACD-3.png}
+
+    \begin{block}{Quy trình}
+        % \small
+        \textbf{(a)} Gộp biên vào đa giác
+
+        \textbf{(b)} Tách đa giác thành hai
+
+        \textbf{(c)} Độ lõm thay đổi sau phân rã
+
+        \vspace{0.2cm}
+        Quá trình tiếp tục đến khi $\leq \tau$
+    \end{block}
+\end{frame}
+
+
 
 \begin{frame}{Các Khái niệm Cơ bản}
 
@@ -145,56 +207,14 @@
 \begin{frame}{Minh họa Các Khái niệm}
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\textwidth]{imgs/ACD-5.png}
+        \includegraphics[width=0.8\textwidth]{../imgs/ACD-5.png}
         \caption{\small Vỏ lồi, khía, cầu và túi trong đa giác không lồi}
-    \end{figure}
-\end{frame}
-
-\begin{frame}{Thuật toán ACD - Ý tưởng}
-
-    \begin{exampleblock}{Chiến lược chia để trị đệ quy}
-        \begin{enumerate}
-            \item \textbf{Đo độ lõm:} Xác định đỉnh lõm có độ lõm lớn nhất
-            \item \textbf{Kiểm tra dung sai:} Nếu độ lõm $< \tau$, kết thúc
-            \item \textbf{Giải quyết đỉnh lõm:} Thêm đường cắt, chia đa giác
-            \item \textbf{Đệ quy:} Áp dụng cho các thành phần mới
-        \end{enumerate}
-    \end{exampleblock}
-
-    \begin{block}{Độ phức tạp}
-        $O(n r^2)$, với $n$ là số đỉnh, $r$ là số đỉnh lõm
-    \end{block}
-
-\end{frame}
-
-\begin{frame}{Quá trình Phân rã Đệ quy}
-    \centering
-    \includegraphics[width=0.7\textwidth]{imgs/ACD-3.png}
-
-    \begin{block}{Quy trình}
-        % \small
-        \textbf{(a)} Gộp biên vào đa giác
-
-        \textbf{(b)} Tách đa giác thành hai
-
-        \textbf{(c)} Độ lõm thay đổi sau phân rã
-
-        \vspace{0.2cm}
-        Quá trình tiếp tục đến khi $\leq \tau$
-    \end{block}
-\end{frame}
-
-\begin{frame}{Minh họa thuật toán}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.8\linewidth]{imgs/ACD-1.png}
-        \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
     \end{figure}
 \end{frame}
 
 \begin{frame}{Các Thước đo Độ lõm}
     \centering
-    \includegraphics[width=0.8\linewidth]{imgs/ACD-2.png}
+    \includegraphics[width=0.8\linewidth]{../imgs/ACD-2.png}
 
     \begin{block}{SL-Concavity}
         Khoảng cách Euclid đến cầu nối (bridge).
@@ -208,7 +228,7 @@
 
 \begin{frame}{Các Thước đo Độ lõm}
     \centering
-    \includegraphics[width=0.7\textwidth]{imgs/sp_concavity.png}
+    \includegraphics[width=0.7\textwidth]{../imgs/sp_concavity.png}
 
     \begin{block}{SP-Concavity}
         Đường đi ngắn nhất trong túi (pocket) đến cầu nối tương ứng.
@@ -223,7 +243,7 @@
 
 \begin{frame}{Các Thước đo Độ lõm}
     \centering
-    \includegraphics[width=0.7\linewidth]{imgs/ACD-6.png}
+    \includegraphics[width=0.7\linewidth]{../imgs/ACD-6.png}
     \begin{alertblock}{H-Concavity}
         Lai ghép SL và SP - Mặc định dùng SL, chuyển sang SP khi phát hiện không đơn điệu (kiểm tra: $n_\beta \cdot n_i < 0$).
     \end{alertblock}
@@ -256,7 +276,7 @@
 \begin{frame}{IRIS Bước 2: Tìm Siêu phẳng}
     \begin{columns}[c]
         \column{0.45\textwidth}
-        \includegraphics[width=\textwidth]{imgs/iris_algo_1.png}
+        \includegraphics[width=\textwidth]{../imgs/iris_algo_1.png}
 
         \column{0.5\textwidth}
         \begin{block}{Biến đổi không gian}
@@ -288,7 +308,7 @@
 \begin{frame}{IRIS Bước 3: Ellipsoid Nội tiếp}
     \begin{columns}[c]
         \column{0.45\textwidth}
-        \includegraphics[width=\textwidth]{imgs/iris_2.png}
+        \includegraphics[width=\textwidth]{../imgs/iris_2.png}
 
         \column{0.5\textwidth}
         \begin{block}{Ellipsoid Definition}
@@ -335,7 +355,7 @@
 \begin{frame}{IRIS - Đặc tính}
     \begin{figure}
         \centering
-        \includegraphics[width=0.5\textwidth]{imgs/time-iris.png}
+        \includegraphics[width=0.5\textwidth]{../imgs/time-iris.png}
         \caption{\small Thời gian thực thi IRIS tăng tuyến tính với số lượng obstacles.}
     \end{figure}
 \end{frame}
@@ -374,7 +394,7 @@
     \begin{columns}[c]
         \column{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imgs/VCC-1.png}
+        \includegraphics[width=\textwidth]{../imgs/VCC-1.png}
 
         \column{0.5\textwidth}
         \begin{block}{Visibility Graph Construction}
@@ -397,7 +417,7 @@
     \begin{columns}[c]
         \column{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imgs/VCC-2.png}
+        \includegraphics[width=\textwidth]{../imgs/VCC-2.png}
 
         \column{0.5\textwidth}
         \begin{block}{Clique Cover Problem}
@@ -423,7 +443,7 @@
     \begin{columns}[c]
         \column{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imgs/VCC-3.png}
+        \includegraphics[width=\textwidth]{../imgs/VCC-3.png}
 
         \column{0.5\textwidth}
         \begin{block}{Ellipsoid Initialization}
@@ -450,7 +470,7 @@
     \begin{columns}[c]
         \column{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imgs/VCC-4.png}
+        \includegraphics[width=\textwidth]{../imgs/VCC-4.png}
 
         \column{0.5\textwidth}
         \begin{block}{Inflation Process}
@@ -476,7 +496,7 @@
     \begin{columns}[c]
         \column{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imgs/VCC-5.png}
+        \includegraphics[width=\textwidth]{../imgs/VCC-5.png}
 
         \column{0.5\textwidth}
         \begin{block}{Iteration Process}
@@ -520,7 +540,7 @@
     \end{exampleblock}
 
     % \begin{center}
-    %     \includegraphics[width=0.35\textwidth]{imgs/VCC-5.png}
+    %     \includegraphics[width=0.35\textwidth]{../imgs/VCC-5.png}
     % \end{center}
 
 \end{frame}
@@ -578,7 +598,7 @@
 \begin{frame}{Ví dụ 2D - Phân hoạch Chính xác}
     \begin{columns}[c]
         \column{0.45\textwidth}
-        \includegraphics[width=\textwidth]{imgs/2d-decompose.png}
+        \includegraphics[width=\textwidth]{../imgs/2d-decompose.png}
 
         \column{0.5\textwidth}
         \begin{block}{Two-Dimensional Example}
@@ -603,7 +623,7 @@
 \begin{frame}{Ví dụ Maze - Grid Decomposition}
     \begin{columns}[c]
         \column{0.45\textwidth}
-        \includegraphics[width=\textwidth]{imgs/maze-decompose.png}
+        \includegraphics[width=\textwidth]{../imgs/maze-decompose.png}
 
         \column{0.5\textwidth}
         \begin{block}{Maze Planning}
