@@ -1,4 +1,3 @@
-% filepath: c:\Users\Admin\Desktop\latex_temp\capstone_project\convex_decomposition_presentation.tex
 \documentclass[aspectratio=169]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage[T5]{fontenc}
@@ -70,7 +69,7 @@
 
 \end{frame}
 
-\begin{frame}{Mục tiêu và Điều kiện Tồn tại}
+\begin{frame}{Mục tiêu}
 
     \textbf{Mục tiêu của Phân hoạch Lồi:}
     \begin{itemize}
@@ -78,15 +77,6 @@
         \item Giảm thiểu chồng chéo
         \item Tránh vùng quá ``mảnh'' hoặc ``dài''
     \end{itemize}
-
-    \vspace{1em}
-    \begin{exampleblock}{Định lý: Tồn tại Phân hoạch Lồi}
-        Bất kỳ đa giác đơn nào đều có thể được phân hoạch thành tập hợp các vùng lồi.
-
-        \textbf{Lý do:} Mọi đa giác đơn có thể tam giác hóa, mỗi tam giác là tập lồi.
-
-        \textbf{Hạn chế:} Tạo ra số lượng lớn các thành phần, không thực tế cho ứng dụng.
-    \end{exampleblock}
 
 \end{frame}
 
@@ -191,9 +181,6 @@
 \end{frame}
 
 \begin{frame}{Ví dụ về Giải quyết Độ lõm}
-    \centering
-    \includegraphics[width=0.7\textwidth]{../imgs/ACD-3.png}
-
     \vspace{0.5em}
     \textbf{Các trường hợp xử lý:}
     
@@ -205,6 +192,9 @@
 
     \vspace{0.2cm}
     Quá trình tiếp tục đến khi độ lõm $\leq \tau$
+
+     \centering
+    \includegraphics[width=0.7\textwidth]{../imgs/ACD-3.png}
 \end{frame}
 
 
@@ -399,49 +389,7 @@
     \end{columns}
 \end{frame}
 
-
-
-\begin{frame}{IRIS Bước 2: Tìm Siêu phẳng}
-    \begin{columns}[c]
-        \column{0.45\textwidth}
-        \begin{block}{Ellipsoid Definition}
-            \small
-            \[
-                \mathcal{E} = \{C\tilde{x} + d : \|\tilde{x}\|_2 \leq 1\}
-            \]
-        \end{block}
-        \includegraphics[width=\textwidth]{../imgs/iris_algo_1.png}
-        \column{0.5\textwidth}
-        
-        \begin{block}{Biến đổi không gian}
-            \small
-            Từ ellipsoid sang quả cầu đơn vị:
-            \[
-                \tilde{x} = C^{-1}(x - d)
-            \]
-        \end{block}
-
-        \begin{block}{QP Problem}
-            \small
-            \[
-                \begin{aligned}
-                    \min_{\tilde{x}, w} \quad & \|\tilde{x}\|^2                \\
-                    \text{s.t.} \quad         & [\tilde{v}_{j,i}]w = \tilde{x} \\
-                                              & w_i \geq 0
-                \end{aligned}
-            \]
-
-            \textbf{Pháp tuyến:}
-            \[
-                \begin{aligned}
-                    a_j = 2C^{-1}C^{-\top}(x^* - d) \\
-                    b_j = a_j^{\top}x^*.
-                \end{aligned}
-            \]
-        \end{block}
-    \end{columns}
-\end{frame}
-
+    
 \begin{frame}{IRIS Bước 3: Ellipsoid Nội tiếp Cực đại}
     \begin{columns}[c]
         \column{0.45\textwidth}
@@ -505,13 +453,13 @@
         \]
         
         \small
-        Với $T$: số vòng lặp IRIS (thường 3-10 vòng)
+        Với $T$: số vòng lặp IRIS (thường 4-8 vòng)
     \end{block}
 
     \vspace{1em}
     \textbf{Giải thích các thành phần:}
     \begin{itemize}
-        \item \textbf{$T$:} Số vòng lặp IRIS - thường hội tụ nhanh (3-10)
+        \item \textbf{$T$:} Số vòng lặp IRIS - thường hội tụ nhanh (4 - 8)
         \item \textbf{$m \cdot n \cdot k$:} Chi phí tìm siêu phẳng phân cách
         \item \textbf{$h^3$:} Chi phí giải SDP cho ellipsoid nội tiếp cực đại
     \end{itemize}
@@ -757,15 +705,14 @@
         \column{0.5\textwidth}
         \textbf{2D đơn giản:}
         \begin{itemize}
-            \item Exact Decomposition
-            \item Đa giác: 12 vùng lồi
+            \item 2D : Manual Exact Decomposition thanh cac da giac loi.
             \item Maze: Grid $50 \times 50$
         \end{itemize}
     
         \vspace{0.8em}
         \textbf{3D Quadrotor:}
         \begin{itemize}
-            \item Axis-aligned boxes
+            \item Box Decomposition
             \item Thu nhỏ theo robot radius
         \end{itemize}
     
@@ -773,7 +720,7 @@
         \textbf{High-DOF (7/14-DOF):}
         \begin{itemize}
             \item IRIS Approximate
-            \item Seed qua Inverse Kinematics
+            \item Seed qua Inverse Kinematics hoặc thu cong.
             \item Dual arms: Tích Descartes
         \end{itemize}
 
@@ -784,7 +731,7 @@
 
 \end{frame}
 
-\begin{frame}{Ví dụ 2D - Phân hoạch Chính xác}
+\begin{frame}{Chi tiết hiện thực 2D - Phân hoạch Chính xác}
     \begin{columns}[c]
         \column{0.45\textwidth}
         \includegraphics[width=\textwidth]{../imgs/2d-decompose.png}
@@ -795,7 +742,7 @@
         \textbf{12 vùng lồi V-polytope}
 
         \vspace{0.3cm}
-        Chuyển đổi sang H-polytope:
+        Chuyển đổi sang dạng H-polytope (hyperplanes):
         \[
             \mathcal{R}_i = \{x \in \mathbb{R}^2 : A_i x \leq b_i\}
         \]
@@ -836,9 +783,9 @@
     \textbf{Thuật toán chia nhỏ không gian:}
     \begin{itemize}
         \item \textbf{Phòng (Indoor):} Hộp duy nhất cho mỗi ô
-              \[
-                  \text{size} = 2.5 - (\text{wall\_offset} + \text{quad\_radius})
-              \]
+            %   \[
+            %       \text{size} = 2.5 - (\text{wall\_offset} + \text{quad\_radius})
+            %   \]
 
         \item \textbf{Ngoài trời (Outdoor):}
               \begin{itemize}
